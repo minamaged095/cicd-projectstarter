@@ -1,5 +1,15 @@
 version: 2.1
+orbs:
+  slack: circleci/slack@4.10.1
 jobs:
+  build:
+    machine: true
+    steps:
+      - run: some build command
+      - slack/notify:
+          branch_pattern: main
+          event: fail
+          template: basic_fail_1
   build-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -113,13 +123,15 @@ jobs:
 workflows:
   default:
     jobs:
+      - build:
+          context: slack-secrets
    #   - build-frontend
-      - build-backend
+ #     - build-backend
       # - test-frontend:
       #    requires: [build-frontend]
       # - test-backend:
       #     requires: [build-backend]
       # - scan-frontend:
       #     requires: [build-frontend]
-      - scan-backend:
-          requires: [build-backend]
+ #    - scan-backend:
+   #       requires: [build-backend]
