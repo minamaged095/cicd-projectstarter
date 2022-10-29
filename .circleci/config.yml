@@ -72,6 +72,43 @@ jobs:
           paths: [backend/node_modules]
           key: backend-test
 
+  scan-frontend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [frontend-build]
+      - run:
+          name: scan fron-end
+          command: |
+            # Your code here
+            cd frontend
+            npm install
+            # npm install oauth-sign@^0.9.0
+            npm audit fix --audit-level=critical --force
+            # If the "npm audit fix" command above could not fix all critical vulnerabilities, try “npm audit fix --force” again
+            npm audit --audit-level=critical
+
+
+  scan-backend:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - restore_cache:
+          keys: [backend-build]
+      - run:
+          name: scan back-end
+          command: |
+            # Your code here
+            cd backend
+            npm install
+            # npm install oauth-sign@^0.9.0
+            npm audit fix --audit-level=critical --force
+            # If the "npm audit fix" command above could not fix all critical vulnerabilities, try “npm audit fix --force” again
+            npm audit --audit-level=critical  
+
 workflows:
   default:
     jobs:
@@ -80,4 +117,8 @@ workflows:
       - test-frontend:
           requires: [build-frontend]
       - test-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - scan-backend:
           requires: [build-backend]
