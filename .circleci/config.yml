@@ -1,15 +1,29 @@
 version: 2.1
-orbs:
-  slack: circleci/slack@4.10.1
-jobs:
-  build:
-    machine: true
+# orbs:
+#   slack: circleci/slack@4.10.1
+commands:
+  destroy-environment:
+    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      - environment:
+          type: string 
     steps:
-      - run: some build command
-      - slack/notify:
-          branch_pattern: main
-          event: fail
-          template: basic_fail_1
+      - run:
+          name: Destroy environments
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name <<parameters.environment>>
+       #     exit 1
+
+jobs:
+  # build:
+  #   machine: true
+  #   steps:
+  #     - run: some build command
+  #     - slack/notify:
+  #         branch_pattern: main
+  #         event: fail
+  #         template: basic_fail_1
   build-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -120,18 +134,61 @@ jobs:
             npm audit --audit-level=critical  
             
 
+  deploy-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --tags project=cicdProject \
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+        #      exit 1
+      - run:
+          name: Ensure front-end infrastructure exist
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --tags project=cicdProject \
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+          #    exit 1
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters "Name=tag:Project,Values=udacity" \
+            --output text | sudo tee -a .circleci/ansible/inventory.txt
+         #   exit 1
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
+      - destroy-environment:
+          environment: "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          environment: "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}"
+
+
 workflows:
   default:
     jobs:
-      - build:
-          context: slack-secrets
-   #   - build-frontend
- #     - build-backend
+ #     - build:
+   #       context: slack-secrets
+      - build-frontend
+      - build-backend
       # - test-frontend:
       #    requires: [build-frontend]
       # - test-backend:
       #     requires: [build-backend]
       # - scan-frontend:
       #     requires: [build-frontend]
- #    - scan-backend:
-   #       requires: [build-backend]
+      # - scan-backend:
+      #     requires: [build-backend]
+      - deploy-infrastructure:
+          requires: [build-backend,build-frontend]
