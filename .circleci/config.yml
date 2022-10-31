@@ -235,4 +235,4 @@ workflows:
       - deploy-infrastructure:
           requires: [build-backend,build-frontend]
       - configure-infrastructure:
-          requires: [deploy-infrastructure]s
+          requires: [deploy-infrastructure]
