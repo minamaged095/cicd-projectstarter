@@ -141,23 +141,23 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      # - run:
-      #     name: Ensure back-end infrastructure exists
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file .circleci/files/backend.yml \
-      #         --tags project=cicdProject \
-      #         --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-      #         --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-      # - run:
-      #     name: Ensure front-end infrastructure exist
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file .circleci/files/frontend.yml \
-      #         --tags project=cicdProject \
-      #         --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-      #         --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-      #
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/backend.yml \
+              --tags project=cicdProject \
+              --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+      - run:
+          name: Ensure front-end infrastructure exist
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/frontend.yml \
+              --tags project=cicdProject \
+              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+      
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -174,7 +174,47 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
-           
+
+  configure-infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+              # You can get this ID in the section where you registered the SSH Key
+              fingerprints: ["d4:83:ea:cd:a5:6e:29:f9:d2:57:45:87:87:76:4b:f0"]
+      - run:
+          name: Install Ansible
+          command: |
+            # Install Ansible
+            apk add --update ansible
+      - run:
+          name: install aws-cli
+          command: |
+            apk add --no-cache aws-cli
+      - run:
+          name: install tar
+          command: |
+            apk add --no-cache tar \
+            gzip
+      - run:
+          name: fix ssh issue
+          command: |
+            # Install Ansible
+            apk add --no-cache openssh-client
+      - run:
+          name: fix ssh issue 2
+          command: |
+            echo "Host *" >> /etc/ssh/ssh_config &&\
+            echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+            #ssh -o StrictHostKeyChecking=no
+      - run:
+          name: Run Playbook and Configure server
+          command: |
+            # Your command
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml
+      # Here's where you will add some code to rollback on failure                
 
 
 workflows:
@@ -194,3 +234,5 @@ workflows:
       #     requires: [build-backend]
       - deploy-infrastructure:
           requires: [build-backend,build-frontend]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]s
