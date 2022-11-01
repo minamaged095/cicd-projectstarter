@@ -191,26 +191,26 @@ jobs:
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:project,Values=cicdProject" \
-            --output text | tee -a .circleci/ansible/inventory.txt
+            --output text | tee -a /tmp/inventory.txt
       - run:
           name: cat inventory file
           command: |
             cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
-          root: ~/
+          root: /tmp/
           paths:
-            - project/.circleci/ansible/inventory.txt
+            - inventory.txt
   test-deploy-infrastructure:
     docker:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
       - attach_workspace:
-          at: ~/project/.circleci/ansible/inventory.txt
+          at: /tmp/inventory.txt
       - run:
           name: cat inventory file
           command: |
-            cat ~/project/.circleci/ansible/inventory.txt
+            cat /tmp/inventory.txt
 
   configure-infrastructure:
     docker:
