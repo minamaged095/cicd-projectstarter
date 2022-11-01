@@ -269,7 +269,7 @@ jobs:
             py-pip \
             build-base \
             && pip install awscli==1.20.7 --upgrade --user \
-            && pip install awscli
+            && pip install awscli \
             && rm -rf /var/cache/apk/*
             aws --version
       - run:
