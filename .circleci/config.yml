@@ -169,29 +169,6 @@ jobs:
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:project,Values=cicdProject" \
             --output text | tee -a .circleci/ansible/inventory.txt
-
-      - persist_to_workspace:
-          root: ~/
-          paths:
-            - project/.circleci/ansible/inventory.txt
-    #  - destroy-environment
-
-  fix-deploy-infrastructure:
-    docker:
-      - image: amazon/aws-cli
-    steps:
-      - checkout
-      - run:
-          name: Install tar utility
-          command: |
-            yum install -y tar gzip
-      - run:
-          name: Add back-end ip to ansible inventory
-          command: |
-            aws ec2 describe-instances \
-            --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            --filters "Name=tag:project,Values=cicdProject" \
-            --output text | tee -a .circleci/ansible/inventory.txt
       - run:
           name: cat inventory file
           command: |
@@ -201,17 +178,7 @@ jobs:
           root: /tmp
           paths:
             - inventory.txt
-  test-deploy-infrastructure:
-    docker:
-      - image: python:3.7-alpine3.11
-    steps:
-      - checkout
-      - attach_workspace:
-          at: /tmp
-      - run:
-          name: cat inventory file
-          command: |
-            cat /tmp/inventory.txt
+    #  - destroy-environment
 
   configure-infrastructure:
     docker:
@@ -219,7 +186,11 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: project/.circleci/ansible/inventory.txt
+          at: /tmp
+      - run:
+          name: copy inventory
+          command: |
+            cp /tmp/inventory.txt .circleci/ansible/
       - add_ssh_keys:
               # You can get this ID in the section where you registered the SSH Key
               fingerprints: ["d4:83:ea:cd:a5:6e:29:f9:d2:57:45:87:87:76:4b:f0"]
@@ -349,7 +320,11 @@ jobs:
           paths: [backend/node_modules]
           key: backend-build
       - attach_workspace:
-          at: project/.circleci/ansible/inventory.txt
+          at: /tmp
+      - run:
+          name: copy inventory
+          command: |
+            cp /tmp/inventory.txt .circleci/ansible/
       - add_ssh_keys:
               # You can get this ID in the section where you registered the SSH Key
           fingerprints: ["d4:83:ea:cd:a5:6e:29:f9:d2:57:45:87:87:76:4b:f0"]
@@ -399,7 +374,11 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: project/.circleci/ansible/inventory.txt
+          at: /tmp
+      - run:
+          name: copy inventory
+          command: |
+            cp /tmp/inventory.txt .circleci/ansible/
       - run:
           name: Install dependencies
           command: |
@@ -442,8 +421,8 @@ workflows:
     jobs:
      ## - build:
      ##    context: slack-secrets
-  #    - build-frontend
-  #    - build-backend
+      - build-frontend
+      - build-backend
       # - test-frontend:
       #     requires: [build-frontend]
       # - test-backend:
@@ -479,16 +458,16 @@ workflows:
    #   - deploy-backend:
    #       requires: [build-backend]
 
-      - fix-deploy-infrastructure
-      - test-deploy-infrastructure:
-           requires: [fix-deploy-infrastructure]
-      # - deploy-infrastructure:
-      #     requires: [build-frontend,build-backend]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
-      # - deploy-frontend:
-      #     requires: [configure-infrastructure]
-      # - deploy-backend:
-      #     requires: [configure-infrastructure]
-      # - smoke-test:
-      #     requires: [deploy-backend,deploy-frontend]
+      # - fix-deploy-infrastructure
+      # - test-deploy-infrastructure:
+      #      requires: [fix-deploy-infrastructure]
+      - deploy-infrastructure:
+          requires: [build-frontend,build-backend]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
+      - deploy-frontend:
+          requires: [configure-infrastructure]
+      - deploy-backend:
+          requires: [configure-infrastructure]
+      - smoke-test:
+          requires: [deploy-backend,deploy-frontend]
