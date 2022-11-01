@@ -1,0 +1,48 @@
+---
+- name: "update apt packages."
+  become: yes
+  apt:
+    update_cache: yes
+
+- name: "upgrade packages"
+  become: yes
+  apt:
+    upgrade: yes
+
+- name: "Install nodejs"
+  become: yes
+  apt:
+    name: nodejs
+    state: present
+
+- name: "Install npm"
+  become: yes
+  apt:
+    name: npm
+    state: present
+
+- name: "Install pm2"
+  become: yes
+  command: npm install pm2 -g
+
+- name: Creates web directory
+  file:
+    path: ~/web
+    state: directory
+
+- name: copy artifact
+  copy:
+    src: artifact.tar.gz
+    dest: ~/web/
+
+- unarchive:
+    src:  ~/web/artifact.tar.gz
+    dest: ~/web/artifact
+
+- name: "stop web server"
+  become: yes
+  command: pm2 stop default
+
+- name: "start web server"
+  become: yes
+  command: cd ~/web/artifact && pm2 start npm -- start # pm2 start ~/web/index.js -f

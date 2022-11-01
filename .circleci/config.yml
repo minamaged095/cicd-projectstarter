@@ -296,6 +296,51 @@ jobs:
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       # Here's where you will add some code to rollback on failure  
+                 
+  deploy-backend:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - attach_workspace:
+          at: project/.circleci/ansible/inventory.txt
+      - add_ssh_keys:
+              # You can get this ID in the section where you registered the SSH Key
+              fingerprints: ["d4:83:ea:cd:a5:6e:29:f9:d2:57:45:87:87:76:4b:f0"]
+      - run:
+          name: Install Ansible
+          command: |
+            # Install Ansible
+            apk add --update ansible
+      - run:
+          name: install tar
+          command: |
+            apk add --no-cache tar \
+            gzip
+      - run:
+          name: fix ssh issue
+          command: |
+            apk add --no-cache openssh-client
+      - run:
+          name: fix ssh issue 2
+          command: |
+            echo "Host *" >> /etc/ssh/ssh_config &&\
+            echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+            #ssh -o StrictHostKeyChecking=no
+      - run:
+          name: Run Playbook and Configure server
+          command: |
+            # Your command
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            # Zip the directory
+            tar -C backend -czvf artifact.tar.gz .
+            cd .circleci/ansible
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+            ansible-playbook -i inventory.txt deploy-backend.yml
+      # Here's where you will add some code to rollback on failure    
 
 workflows:
   default:
@@ -330,5 +375,7 @@ workflows:
     #  - run-migrations:
    #       requires: [configure-infrastructure]
       - deploy-frontend:
+          requires: [configure-infrastructure]
+      - deploy-backend:
           requires: [configure-infrastructure]
     #  - run-migrations
