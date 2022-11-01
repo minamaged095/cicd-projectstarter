@@ -179,18 +179,20 @@ jobs:
           paths:
             - inventory.txt
     #  - destroy-environment
-
-  configure-infrastructure:
+  configure_infrastructure:
     docker:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - attach_workspace:
-          at: /tmp
+   #   - attach_workspace:
+    #      at: /tmp
       - run:
           name: copy inventory
           command: |
-            cp /tmp/inventory.txt .circleci/ansible/
+         #   cp /tmp/inventory.txt .circleci/ansible/
+            echo ""[web]" > .circleci/ansible/inventory.txt
+            echo "54.187.195.121" >> .circleci/ansible/inventory.txt
+            echo "54.185.238.15" >> .circleci/ansible/inventory.txt
       - add_ssh_keys:
               # You can get this ID in the section where you registered the SSH Key
               fingerprints: ["d4:83:ea:cd:a5:6e:29:f9:d2:57:45:87:87:76:4b:f0"]
@@ -200,23 +202,10 @@ jobs:
             # Install Ansible
             apk add --update ansible
       - run:
-          name: install aws-cli
-          command: |
-            apk add --update \
-            python3 \
-            python3-dev \
-            py-pip \
-            build-base \
-            && pip install awscli==1.20.7 --upgrade --user \
-            && rm -rf /var/cache/apk/*
-      - run:
-          name: install tar
-          command: |
-            apk add --no-cache tar \
-            gzip
-      - run:
           name: fix ssh issue
           command: |
+            # Install Ansible
+
             apk add --no-cache openssh-client
       - run:
           name: fix ssh issue 2
@@ -228,8 +217,8 @@ jobs:
           name: Run Playbook and Configure server
           command: |
             # Your command
-            cd .circleci/ansible
-            ansible-playbook -i inventory.txt configure-server.yml
+
+            ansible-playbook -i inventory main-remote.yml
       # Here's where you will add some code to rollback on failure                
 
   run-migrations:
@@ -419,55 +408,56 @@ jobs:
 workflows:
   default:
     jobs:
-     ## - build:
-     ##    context: slack-secrets
-      - build-frontend
-      - build-backend
-      # - test-frontend:
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     requires: [build-frontend]
-      # - scan-backend:
-      #     requires: [build-backend]
+#      ## - build:
+#      ##    context: slack-secrets
+#       - build-frontend
+#       - build-backend
+#       # - test-frontend:
+#       #     requires: [build-frontend]
+#       # - test-backend:
+#       #     requires: [build-backend]
+#       # - scan-frontend:
+#       #     requires: [build-frontend]
+#       # - scan-backend:
+#       #     requires: [build-backend]
+# #       - deploy-infrastructure:
+# #           requires: [scan-frontend]
+# #  ##     - configure-infrastructure
+# #       - configure-infrastructure:
+# #           requires: [deploy-infrastructure]
+# #       - run-migrations:
+# #           requires: [configure-infrastructure]
+# #  ##     - deploy-frontend
+# #       - deploy-frontend:
+# #           requires: [run-migrations]
+
+#   #     - deploy-infrastructure:
+#   #         requires: [build-frontend,build-backend]
+#   #     - configure-infrastructure:
+#   #         requires: [deploy-infrastructure]
+#   #   #  - run-migrations:
+#   #  #       requires: [configure-infrastructure]
+#   # #    - deploy-frontend:
+#   #  #       requires: [configure-infrastructure]
+#   #     - deploy-backend:
+#   #         requires: [configure-infrastructure]
+#   #   #  - run-migrations
+
+
+#    #   - deploy-backend:
+#    #       requires: [build-backend]
+
+#       # - fix-deploy-infrastructure
+#       # - test-deploy-infrastructure:
+#       #      requires: [fix-deploy-infrastructure]
 #       - deploy-infrastructure:
-#           requires: [scan-frontend]
-#  ##     - configure-infrastructure
+#           requires: [build-frontend,build-backend]
 #       - configure-infrastructure:
 #           requires: [deploy-infrastructure]
-#       - run-migrations:
-#           requires: [configure-infrastructure]
-#  ##     - deploy-frontend
 #       - deploy-frontend:
-#           requires: [run-migrations]
-
-  #     - deploy-infrastructure:
-  #         requires: [build-frontend,build-backend]
-  #     - configure-infrastructure:
-  #         requires: [deploy-infrastructure]
-  #   #  - run-migrations:
-  #  #       requires: [configure-infrastructure]
-  # #    - deploy-frontend:
-  #  #       requires: [configure-infrastructure]
-  #     - deploy-backend:
-  #         requires: [configure-infrastructure]
-  #   #  - run-migrations
-
-
-   #   - deploy-backend:
-   #       requires: [build-backend]
-
-      # - fix-deploy-infrastructure
-      # - test-deploy-infrastructure:
-      #      requires: [fix-deploy-infrastructure]
-      - deploy-infrastructure:
-          requires: [build-frontend,build-backend]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - deploy-frontend:
-          requires: [configure-infrastructure]
-      - deploy-backend:
-          requires: [configure-infrastructure]
-      - smoke-test:
-          requires: [deploy-backend,deploy-frontend]
+#           requires: [configure-infrastructure]
+#       - deploy-backend:
+#           requires: [configure-infrastructure]
+#       - smoke-test:
+#           requires: [deploy-backend,deploy-frontend]
+        - configure-infrastructure
