@@ -301,6 +301,9 @@ jobs:
     docker:
       - image: python:3.7-alpine3.11
     steps:
+      - restore_cache:
+          paths: [backend/node_modules]
+          key: backend-build
       - attach_workspace:
           at: project/.circleci/ansible/inventory.txt
       - add_ssh_keys:
@@ -374,8 +377,8 @@ workflows:
           requires: [deploy-infrastructure]
     #  - run-migrations:
    #       requires: [configure-infrastructure]
-      - deploy-frontend:
-          requires: [configure-infrastructure]
+  #    - deploy-frontend:
+   #       requires: [configure-infrastructure]
       - deploy-backend:
           requires: [configure-infrastructure]
     #  - run-migrations
