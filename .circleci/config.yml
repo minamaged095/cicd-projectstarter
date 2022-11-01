@@ -217,8 +217,8 @@ jobs:
           name: Run Playbook and Configure server
           command: |
             # Your command
-
-            ansible-playbook -i inventory main-remote.yml
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt main-remote.yml
       # Here's where you will add some code to rollback on failure                
 
   run-migrations:
