@@ -27,19 +27,19 @@
 
 - name: Creates web directory
   file:
-    path: ~/web
+    path: /tmp/web
     state: directory
 
 - name: copy artifact
   copy:
     src: ../files/artifact.tar.gz
-    dest: ~/web/
+    dest: /tmp/web
 - name: ls comm
   become: yes
-  command: cd ~/web && ls
+  command: cd /tmp/web && ls
 - unarchive:
-    src:  ~/web/artifact.tar.gz
-    dest: ~/web/artifact
+    src:  /tmp/web/artifact.tar.gz
+    dest: /tmp/web/artifact
 
 - name: "stop web server"
   become: yes
