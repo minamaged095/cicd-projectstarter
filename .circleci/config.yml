@@ -206,7 +206,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: project/.circleci/ansible/inventory.txt
+          at: .circleci/ansible/inventory.txt
       - run:
           name: cat inventory file
           command: |
