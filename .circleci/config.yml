@@ -252,46 +252,22 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: amazon/aws-cli
     steps:
       - checkout
       - run:
-          name: Install Ansible
+          name: Install ansible
           command: |
-            # Install Ansible
-            apk add --update ansible
+            yum install -y ansible
       - run:
-          name: install aws-cli
+          name: Install tar utility
           command: |
-            apk add --update \
-            python3 \
-            python3-dev \
-            py-pip \
-            build-base \
-            && pip install awscli==1.20.7 --upgrade --user \
-            && pip install awscli \
-            && rm -rf /var/cache/apk/*
-            aws --version
-      - run:
-          name: install tar
-          command: |
-            apk add --no-cache tar \
-            gzip
-      - run:
-          name: fix ssh issue
-          command: |
-            apk add --no-cache openssh-client
-      - run:
-          name: fix ssh issue 2
-          command: |
-            echo "Host *" >> /etc/ssh/ssh_config &&\
-            echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
-            #ssh -o StrictHostKeyChecking=no
+            yum install -y tar gzip
       - run:
           name: install node and npm
           command: |
-            apk add --update nodejs npm
-            apk add --update npm
+            yum install -y nodejs npm
+          #  apk add --update npm
       - run:
           name: Get backend url
           command: |
