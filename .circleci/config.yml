@@ -305,10 +305,10 @@ workflows:
           requires: [build-backend]
       - scan-frontend:
           requires: [build-frontend]
-      - scan-backend:
-          requires: [build-backend]
+      # - scan-backend:
+      #     requires: [build-backend]
       - deploy-infrastructure:
-          requires: [scan-backend,scan-frontend]
+          requires: [scan-frontend]
  ##     - configure-infrastructure
       - configure-infrastructure:
           requires: [deploy-infrastructure]
