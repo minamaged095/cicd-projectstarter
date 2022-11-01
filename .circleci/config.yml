@@ -338,6 +338,8 @@ jobs:
             ls
             pwd
             cd project
+            echo "inside project"
+            ls
             cd backend
             npm i
             npm run build
