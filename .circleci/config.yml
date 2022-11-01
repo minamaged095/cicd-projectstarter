@@ -190,7 +190,7 @@ jobs:
           name: copy inventory
           command: |
          #   cp /tmp/inventory.txt .circleci/ansible/
-            echo ""[web]" > .circleci/ansible/inventory.txt
+            echo "[web]" > .circleci/ansible/inventory.txt
             echo "54.187.195.121" >> .circleci/ansible/inventory.txt
             echo "54.185.238.15" >> .circleci/ansible/inventory.txt
       - add_ssh_keys:
