@@ -293,18 +293,22 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            # export BACKEND_IP=$(aws ec2 describe-instances \
-            # --query 'Reservations[*].Instances[*].PublicIpAddress' \
-            # --filters "Name=tag:Project,Values=udacity" \
-            # --output text | tee -a .circleci/ansible/inventory.txt)
-            # export API_URL="http://${BACKEND_IP}:3030"
-            # echo "API_URL = ${API_URL}"
-            # echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-            # cat frontend/.env
+            export BACKEND_IP=$(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters "Name=tag:Project,Values=udacity" \
+            --output text | tee -a .circleci/ansible/inventory.txt)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "API_URL = ${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
       - run:
           name: Deploy frontend objects
           command: |
-            # your code here
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       # Here's where you will add some code to rollback on failure  
 
 workflows:
@@ -323,10 +327,12 @@ workflows:
       # - scan-backend:
       #     requires: [build-backend]
    #   - deploy-infrastructure:
-   #       requires: [build-backend,build-frontend]
+   #       requires: [scan-backend,scan-frontend]
  ###     - configure-infrastructure
   #    - configure-infrastructure:
      #     requires: [deploy-infrastructure]
  #     - run-migrations:
  #         requires: [configure-infrastructure]
-      - deploy-frontend
+      - deply-frontend
+ #     - deploy-frontend:
+  #        requires: [run-migrations]
