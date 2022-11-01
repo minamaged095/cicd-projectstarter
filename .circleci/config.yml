@@ -191,7 +191,7 @@ jobs:
             aws ec2 describe-instances \
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:project,Values=cicdProject" \
-            --output text | tee -a /tmp/inventory.txt
+            --output text | tee -a .circleci/ansible/inventory.txt
       - run:
           name: cat inventory file
           command: |
