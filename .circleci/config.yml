@@ -175,6 +175,24 @@ jobs:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
 
+fix-deploy-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --filters "Name=tag:project,Values=cicdProject" \
+            --output text | tee -a .circleci/ansible/inventory.txt
+      - run:
+          name: cat inventory file
+          command: |
+            cat .circleci/ansible/inventory.txt
+
+
   configure-infrastructure:
     docker:
       - image: python:3.7-alpine3.11
@@ -441,14 +459,14 @@ workflows:
    #   - deploy-backend:
    #       requires: [build-backend]
 
-
-      - deploy-infrastructure:
-          requires: [build-frontend,build-backend]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - deploy-frontend:
-          requires: [configure-infrastructure]
-      - deploy-backend:
-          requires: [configure-infrastructure]
-      - smoke-test:
-          requires: [deploy-backend,deploy-frontend]
+      - fix-deploy-infrastructure
+      # - deploy-infrastructure:
+      #     requires: [build-frontend,build-backend]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
+      # - deploy-frontend:
+      #     requires: [configure-infrastructure]
+      # - deploy-backend:
+      #     requires: [configure-infrastructure]
+      # - smoke-test:
+      #     requires: [deploy-backend,deploy-frontend]
