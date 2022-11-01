@@ -420,15 +420,6 @@ jobs:
             mkdir .circleci/ansible/roles/deploy/files
             cp artifact.tar.gz .circleci/ansible/roles/deploy/files
       - run:
-          name: make directory and copy tar
-          command: |
-            cd .circleci/ansible
-            mkdir r.circleci/ansible/oles/deploy/files
-            ls
-            cp artifact.tar.gz roles/deploy/files
-            echo "Contents  of the inventory.txt file is -------"
-            cat inventory.txt
-      - run:
           name: run playbook
           command: |
             cd .circleci/ansible
