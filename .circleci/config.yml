@@ -175,7 +175,7 @@ jobs:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
 
-fix-deploy-infrastructure:
+  fix-deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
     steps:
