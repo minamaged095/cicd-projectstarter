@@ -199,16 +199,16 @@ jobs:
           command: |
             # Install Ansible
             apk add --update ansible
-      # - run:
-      #     name: install aws-cli
-      #     command: |
-      #       apk add --update \
-      #       python3 \
-      #       python3-dev \
-      #       py-pip \
-      #       build-base \
-      #       && pip install awscli==1.20.7 --upgrade --user \
-      #       && rm -rf /var/cache/apk/*
+      - run:
+          name: install aws-cli
+          command: |
+            apk add --update \
+            python3 \
+            python3-dev \
+            py-pip \
+            build-base \
+            && pip install awscli==1.20.7 --upgrade --user \
+            && rm -rf /var/cache/apk/*
       - run:
           name: install tar
           command: |
