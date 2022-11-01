@@ -301,11 +301,13 @@ jobs:
     docker:
       - image: python:3.7-alpine3.11
     steps:
-      - restore_cache:
-          paths: [backend/node_modules]
-          key: backend-build
+      # - restore_cache:
+      #     keys: [backend-build]
+      # - restore_cache:
+      #     paths: [backend/node_modules]
+      #     key: backend-build
       - attach_workspace:
-          at: project/.circleci/ansible/inventory.txt
+          at: project/
       - add_ssh_keys:
               # You can get this ID in the section where you registered the SSH Key
               fingerprints: ["d4:83:ea:cd:a5:6e:29:f9:d2:57:45:87:87:76:4b:f0"]
@@ -371,14 +373,18 @@ workflows:
 #       - deploy-frontend:
 #           requires: [run-migrations]
 
-      - deploy-infrastructure:
-          requires: [build-frontend,build-backend]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-    #  - run-migrations:
-   #       requires: [configure-infrastructure]
-  #    - deploy-frontend:
-   #       requires: [configure-infrastructure]
+  #     - deploy-infrastructure:
+  #         requires: [build-frontend,build-backend]
+  #     - configure-infrastructure:
+  #         requires: [deploy-infrastructure]
+  #   #  - run-migrations:
+  #  #       requires: [configure-infrastructure]
+  # #    - deploy-frontend:
+  #  #       requires: [configure-infrastructure]
+  #     - deploy-backend:
+  #         requires: [configure-infrastructure]
+  #   #  - run-migrations
+
+
       - deploy-backend:
-          requires: [configure-infrastructure]
-    #  - run-migrations
+          requires: [build-backend]
