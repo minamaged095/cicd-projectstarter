@@ -337,6 +337,7 @@ jobs:
             # Your command
             ls
             pwd
+            cd project
             cd backend
             npm i
             npm run build
