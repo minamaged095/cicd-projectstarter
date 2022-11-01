@@ -437,4 +437,5 @@ workflows:
 
    #   - deploy-backend:
    #       requires: [build-backend]
-      - smoke-test
+      - smoke-test:
+          requires: [build-frontend,build-backend]
