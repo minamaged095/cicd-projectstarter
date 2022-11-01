@@ -32,7 +32,7 @@
 
 - name: copy artifact
   copy:
-    src: ../files/artifact.tar.gz
+    src: artifact.tar.gz
     dest: /tmp/web/artifact.tar.gz
 
 # - name: ls comm
