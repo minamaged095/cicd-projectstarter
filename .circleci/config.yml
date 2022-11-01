@@ -206,7 +206,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /tmp/inventory.txt
+          at: /tmp/
       - run:
           name: cat inventory file
           command: |
