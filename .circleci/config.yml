@@ -268,7 +268,8 @@ jobs:
       - run:
           name: install node and npm
           command: |
-            yum install -y nodejs npm
+            curl -sL https://rpm.nodesource.com/setup_8.x | sudo bash -
+            yum install -y nodejs
           #  apk add --update npm
       - run:
           name: Get backend url
