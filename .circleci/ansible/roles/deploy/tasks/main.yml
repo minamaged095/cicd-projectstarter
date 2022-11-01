@@ -33,10 +33,10 @@
 - name: copy artifact
   copy:
     src: ../files/artifact.tar.gz
-    dest: /tmp/web
+    dest: /tmp/web/artifact.tar.gz
 
 - name: ls comm
- # become: yes
+  become: yes
   command: cd /tmp/web && ls
 
 - unarchive:
