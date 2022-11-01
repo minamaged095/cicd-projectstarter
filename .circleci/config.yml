@@ -321,6 +321,10 @@ jobs:
             # Install Ansible
             apk add --update ansible
       - run:
+          name: Install node and npm
+          command: |
+            apk add --update nodejs npm
+      - run:
           name: install tar
           command: |
             apk add --no-cache tar \
