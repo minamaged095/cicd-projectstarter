@@ -417,12 +417,13 @@ jobs:
             # Zip the directory
             tar -C backend -czvf artifact.tar.gz .
             ls
-            cp artifact.tar.gz roles/deploy/files
+            mkdir .circleci/ansible/oles/deploy/files
+            cp artifact.tar.gz .circleci/ansible/oles/deploy/files
       - run:
           name: make directory and copy tar
           command: |
             cd .circleci/ansible
-            mkdir roles/deploy/files
+            mkdir r.circleci/ansible/oles/deploy/files
             ls
             cp artifact.tar.gz roles/deploy/files
             echo "Contents  of the inventory.txt file is -------"
