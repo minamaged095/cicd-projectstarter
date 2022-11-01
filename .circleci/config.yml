@@ -357,11 +357,11 @@ jobs:
 
   smoke-test:
     docker:
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
-   #   - attach_workspace:
-   #       at: project/.circleci/ansible/inventory.txt
+      - attach_workspace:
+          at: project/.circleci/ansible/inventory.txt
       - run:
           name: Install dependencies
           command: |
@@ -369,10 +369,8 @@ jobs:
       - run:
           name: Get backend url
           command: |
-              BACKEND_IP= $(aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters "Name=tag:Project,Values=udacity" \
-              --output text )
+              BACKEND_IP= 10.0.70.10
+              # $(cat .circleci/ansible/inventory.txt)
       - run:
           name: Backend smoke test.
           command: |
