@@ -27,21 +27,21 @@
 
 - name: Creates web directory
   file:
-    path: /tmp/web
+    path: /etc/web
     state: directory
 
 - name: copy artifact
   copy:
-    src: artifact.tar.gz
-    dest: /tmp/web/artifact.tar.gz
+    src: ../files/artifact.tar.gz
+    dest: /etc/web/artifact.tar.gz
 
 # - name: ls comm
 #   become: yes
 #   command: cd /tmp/web && ls
 
 - unarchive:
-    src:  /tmp/web/artifact.tar.gz
-    dest: /tmp/web
+    src:  /etc/web/artifact.tar.gz
+    dest: /etc/web
 
 - name: "stop web server"
   become: yes
@@ -49,4 +49,4 @@
 
 - name: "start web server"
   become: yes
-  command: cd /tmp/web && pm2 start npm -- start # pm2 start ~/web/index.js -f
+  command: cd /etc/web && pm2 start npm -- start # pm2 start ~/web/index.js -f
