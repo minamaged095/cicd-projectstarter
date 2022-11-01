@@ -33,11 +33,11 @@
         name: nodejs
         state: present
 
-    - name: "install python for Ansible."
-      become: yes
-      apt:
-        name: python
-        state: present
+    # - name: "install python for Ansible."
+    #   become: yes
+    #   apt:
+    #     name: python
+    #     state: present
 
     - name: "Install npm"
       become: yes
