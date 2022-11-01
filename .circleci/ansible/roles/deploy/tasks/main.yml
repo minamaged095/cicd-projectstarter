@@ -34,7 +34,9 @@
   copy:
     src: ../files/artifact.tar.gz
     dest: ~/web/
-
+- name: ls comm
+  become: yes
+  command: cd ~/web && ls
 - unarchive:
     src:  ~/web/artifact.tar.gz
     dest: ~/web/artifact
