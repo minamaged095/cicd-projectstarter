@@ -26,11 +26,13 @@
   command: npm install pm2 -g
 
 - name: Creates web directory
+  become: yes
   file:
     path: /etc/web
     state: directory
 
 - name: copy artifact
+  become: yes
   copy:
     src: ../files/artifact.tar.gz
     dest: /etc/web/artifact.tar.gz
@@ -40,6 +42,7 @@
 #   command: cd /tmp/web && ls
 
 - unarchive:
+    become: yes
     src:  /etc/web/artifact.tar.gz
     dest: /etc/web
 
