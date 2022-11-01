@@ -416,6 +416,8 @@ jobs:
             cd ..
             # Zip the directory
             tar -C backend -czvf artifact.tar.gz .
+            ls
+            cp artifact.tar.gz roles/deploy/files
       - run:
           name: make directory and copy tar
           command: |
