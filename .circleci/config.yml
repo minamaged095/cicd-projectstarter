@@ -235,7 +235,7 @@ jobs:
           name: Run migrations
           command: |
             cd backend
-            rm node_modules
+            rm -r node_modules
             rm package-lock.json
             npm install
             # npm audit fix
@@ -323,11 +323,12 @@ workflows:
 #       - deploy-frontend:
 #           requires: [run-migrations]
 
-      - deploy-infrastructure:
-          requires: [build-frontend,build-backend]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - run-migrations:
-          requires: [configure-infrastructure]
-      - deploy-frontend:
-          requires: [run-migrations]
+      # - deploy-infrastructure:
+      #     requires: [build-frontend,build-backend]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
+      # - run-migrations:
+      #     requires: [configure-infrastructure]
+      # - deploy-frontend:
+      #     requires: [run-migrations]
+      - run-migrations
