@@ -180,6 +180,8 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - attach_workspace:
+          at: project/.circleci/ansible/inventory.txt
       - add_ssh_keys:
               # You can get this ID in the section where you registered the SSH Key
               fingerprints: ["d4:83:ea:cd:a5:6e:29:f9:d2:57:45:87:87:76:4b:f0"]
@@ -206,7 +208,6 @@ jobs:
       - run:
           name: fix ssh issue
           command: |
-            # Install Ansible
             apk add --no-cache openssh-client
       - run:
           name: fix ssh issue 2
@@ -222,6 +223,89 @@ jobs:
             ansible-playbook -i inventory.txt configure-server.yml
       # Here's where you will add some code to rollback on failure                
 
+  run-migrations:
+    docker:
+      - image: cimg/node:12.22.10
+    steps:
+      - checkout
+      - restore_cache:
+          paths: [backend/node_modules]
+          key: backend-build
+      - run:
+          name: Run migrations
+          command: |
+            cd backend
+            npm install
+            # Run and save the migration output
+            npm run migrations > migrations_dump.txt
+      - run:
+          name: Send migration results to memstash
+          command: | 
+            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            then
+                # If you are using memstash.io, generate the token "7933fe63-4687-4fa1-8426-aa25aa1730ec" on the website
+              #  curl -H "Content-Type: text/plain" -H "token: 7933fe63-4687-4fa1-8426-aa25aa1730ec" --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
+                # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
+                curl https://kvdb.io/BaBUKPcutaG5oSneVWB6z1/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+            fi
+     # Here's where you will add some code to rollback on failure    
+
+  deploy-frontend:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - run:
+          name: Install Ansible
+          command: |
+            # Install Ansible
+            apk add --update ansible
+      - run:
+          name: install aws-cli
+          command: |
+            apk add --update \
+            python3 \
+            python3-dev \
+            py-pip \
+            build-base \
+            && pip install awscli==1.20.7 --upgrade --user \
+            && rm -rf /var/cache/apk/*
+      - run:
+          name: install tar
+          command: |
+            apk add --no-cache tar \
+            gzip
+      - run:
+          name: fix ssh issue
+          command: |
+            apk add --no-cache openssh-client
+      - run:
+          name: fix ssh issue 2
+          command: |
+            echo "Host *" >> /etc/ssh/ssh_config &&\
+            echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+            #ssh -o StrictHostKeyChecking=no
+      - run:
+          name: install node and npm
+          command: |
+            apk add --update nodejs npm
+            apk add --update npm
+      - run:
+          name: Get backend url
+          command: |
+            # export BACKEND_IP=$(aws ec2 describe-instances \
+            # --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            # --filters "Name=tag:Project,Values=udacity" \
+            # --output text | tee -a .circleci/ansible/inventory.txt)
+            # export API_URL="http://${BACKEND_IP}:3030"
+            # echo "API_URL = ${API_URL}"
+            # echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            # cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            # your code here
+      # Here's where you will add some code to rollback on failure  
 
 workflows:
   default:
@@ -240,5 +324,9 @@ workflows:
       #     requires: [build-backend]
    #   - deploy-infrastructure:
    #       requires: [build-backend,build-frontend]
-      - configure-infrastructure
+ ###     - configure-infrastructure
+  #    - configure-infrastructure:
      #     requires: [deploy-infrastructure]
+ #     - run-migrations:
+ #         requires: [configure-infrastructure]
+      - deploy-frontend
