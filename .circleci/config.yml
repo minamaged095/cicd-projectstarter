@@ -196,8 +196,9 @@ jobs:
           name: cat inventory file
           command: |
             cat .circleci/ansible/inventory.txt
+            cp .circleci/ansible/inventory.txt /tmp
       - persist_to_workspace:
-          root: /tmp/
+          root: /tmp
           paths:
             - inventory.txt
   test-deploy-infrastructure:
@@ -206,7 +207,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: /tmp/
+          at: /tmp
       - run:
           name: cat inventory file
           command: |
