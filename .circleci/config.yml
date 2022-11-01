@@ -197,9 +197,9 @@ jobs:
           command: |
             cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
-          root: project
+          root: .circleci
           paths:
-            - .circleci/ansible/inventory.txt
+            - ansible/inventory.txt
   test-deploy-infrastructure:
     docker:
       - image: python:3.7-alpine3.11
