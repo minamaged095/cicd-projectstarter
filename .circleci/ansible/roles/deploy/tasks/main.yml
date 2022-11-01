@@ -35,13 +35,13 @@
     src: ../files/artifact.tar.gz
     dest: /tmp/web/artifact.tar.gz
 
-- name: ls comm
-  become: yes
-  command: cd /tmp/web && ls
+# - name: ls comm
+#   become: yes
+#   command: cd /tmp/web && ls
 
 - unarchive:
     src:  /tmp/web/artifact.tar.gz
-    dest: /tmp/web/artifact
+    dest: /tmp/web
 
 - name: "stop web server"
   become: yes
@@ -49,4 +49,4 @@
 
 - name: "start web server"
   become: yes
-  command: cd ~/web/artifact && pm2 start npm -- start # pm2 start ~/web/index.js -f
+  command: cd /tmp/web && pm2 start npm -- start # pm2 start ~/web/index.js -f
