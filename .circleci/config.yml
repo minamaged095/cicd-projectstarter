@@ -369,7 +369,7 @@ jobs:
       - run:
           name: Get backend url
           command: |
-              BACKEND_IP= 10.0.70.10
+              BACKEND_IP= grep -m 2 -o '.*' .circleci/ansible/inventory.txt | cut -d ':' -f 1 | tail -n 1
               # $(cat .circleci/ansible/inventory.txt)
       - run:
           name: Backend smoke test.
