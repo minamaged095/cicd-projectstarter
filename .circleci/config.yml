@@ -270,6 +270,7 @@ jobs:
             build-base \
             && pip install awscli==1.20.7 --upgrade --user \
             && rm -rf /var/cache/apk/*
+            aws --version
       - run:
           name: install tar
           command: |
