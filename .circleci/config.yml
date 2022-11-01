@@ -333,6 +333,6 @@ workflows:
      #     requires: [deploy-infrastructure]
  #     - run-migrations:
  #         requires: [configure-infrastructure]
-      - deply-frontend
+      - deploy-frontend
  #     - deploy-frontend:
   #        requires: [run-migrations]
