@@ -342,7 +342,7 @@ jobs:
             echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
             #ssh -o StrictHostKeyChecking=no
       - run:
-          name: Run Playbook and Configure server
+          name: prep tar file
           command: |
             # Your command
             cd backend
@@ -351,13 +351,85 @@ jobs:
             cd ..
             # Zip the directory
             tar -C backend -czvf artifact.tar.gz .
+      - run:
+          name: make directory and copy tar
+          command: |
             cd .circleci/ansible
             mkdir roles/deploy/files
             cp artifact.tar.gz roles/deploy/files
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
+      - run:
+          name: run playbook
+          command: |
+            cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
       # Here's where you will add some code to rollback on failure    
+
+  
+  fix-deploy-backend:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - run:
+          name: copy inventory
+          command: |
+            # cp /tmp/inventory.txt .circleci/ansible/
+            # cp /tmp/inventory.txt .circleci/ansible/
+            echo "[web]" > .circleci/ansible/inventory.txt
+            echo "54.214.99.86" >> .circleci/ansible/inventory.txt
+      - add_ssh_keys:
+              # You can get this ID in the section where you registered the SSH Key
+          fingerprints: ["9f:31:95:1b:c8:bb:fe:df:bf:d6:76:01:07:fb:ef:f1"]
+      - run:
+          name: Install Ansible
+          command: |
+            # Install Ansible
+            apk add --update ansible
+      - run:
+          name: Install node and npm
+          command: |
+            apk add --update nodejs npm
+      - run:
+          name: install tar
+          command: |
+            apk add --no-cache tar \
+            gzip
+      - run:
+          name: fix ssh issue
+          command: |
+            apk add --no-cache openssh-client
+      - run:
+          name: fix ssh issue 2
+          command: |
+            echo "Host *" >> /etc/ssh/ssh_config &&\
+            echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+            #ssh -o StrictHostKeyChecking=no
+      - run:
+          name: prep tar file
+          command: |
+            # Your command
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            # Zip the directory
+            tar -C backend -czvf artifact.tar.gz .
+      - run:
+          name: make directory and copy tar
+          command: |
+            cd .circleci/ansible
+            mkdir roles/deploy/files
+            cp artifact.tar.gz roles/deploy/files
+            echo "Contents  of the inventory.txt file is -------"
+            cat inventory.txt
+      - run:
+          name: run playbook
+          command: |
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt deploy-backend.yml
+      # Here's where you will add some code to rollback on failure  
 
   smoke-test:
     docker:
@@ -410,60 +482,60 @@ jobs:
 workflows:
   default:
     jobs:
-     ## - build:
-     ##    context: slack-secrets
-      - build-frontend
-      - build-backend
-      # - test-frontend:
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     requires: [build-frontend]
-      # - scan-backend:
-      #     requires: [build-backend]
+#      ## - build:
+#      ##    context: slack-secrets
+#       - build-frontend
+#       - build-backend
+#       # - test-frontend:
+#       #     requires: [build-frontend]
+#       # - test-backend:
+#       #     requires: [build-backend]
+#       # - scan-frontend:
+#       #     requires: [build-frontend]
+#       # - scan-backend:
+#       #     requires: [build-backend]
+# #       - deploy-infrastructure:
+# #           requires: [scan-frontend]
+# #  ##     - configure-infrastructure
+# #       - configure-infrastructure:
+# #           requires: [deploy-infrastructure]
+# #       - run-migrations:
+# #           requires: [configure-infrastructure]
+# #  ##     - deploy-frontend
+# #       - deploy-frontend:
+# #           requires: [run-migrations]
+
+#   #     - deploy-infrastructure:
+#   #         requires: [build-frontend,build-backend]
+#   #     - configure-infrastructure:
+#   #         requires: [deploy-infrastructure]
+#   #   #  - run-migrations:
+#   #  #       requires: [configure-infrastructure]
+#   # #    - deploy-frontend:
+#   #  #       requires: [configure-infrastructure]
+#   #     - deploy-backend:
+#   #         requires: [configure-infrastructure]
+#   #   #  - run-migrations
+
+
+#    #   - deploy-backend:
+#    #       requires: [build-backend]
+
+#       # - fix-deploy-infrastructure
+#       # - test-deploy-infrastructure:
+#       #      requires: [fix-deploy-infrastructure]
 #       - deploy-infrastructure:
-#           requires: [scan-frontend]
-#  ##     - configure-infrastructure
+#           requires: [build-frontend,build-backend]
 #       - configure-infrastructure:
 #           requires: [deploy-infrastructure]
-#       - run-migrations:
-#           requires: [configure-infrastructure]
-#  ##     - deploy-frontend
 #       - deploy-frontend:
-#           requires: [run-migrations]
-
-  #     - deploy-infrastructure:
-  #         requires: [build-frontend,build-backend]
-  #     - configure-infrastructure:
-  #         requires: [deploy-infrastructure]
-  #   #  - run-migrations:
-  #  #       requires: [configure-infrastructure]
-  # #    - deploy-frontend:
-  #  #       requires: [configure-infrastructure]
-  #     - deploy-backend:
-  #         requires: [configure-infrastructure]
-  #   #  - run-migrations
-
-
-   #   - deploy-backend:
-   #       requires: [build-backend]
-
-      # - fix-deploy-infrastructure
-      # - test-deploy-infrastructure:
-      #      requires: [fix-deploy-infrastructure]
-      - deploy-infrastructure:
-          requires: [build-frontend,build-backend]
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - deploy-frontend:
-          requires: [configure-infrastructure]
-      - deploy-backend:
-          requires: [configure-infrastructure]
-      - smoke-test:
-          requires: [deploy-backend,deploy-frontend]
+#           requires: [configure-infrastructure]
+#       - deploy-backend:
+#           requires: [configure-infrastructure]
+#       - smoke-test:
+#           requires: [deploy-backend,deploy-frontend]
  
  
       # - configure-infrastructure
-      # - deploy-backend:
+      - deploy-backend
       #     requires: [configure-infrastructure]
