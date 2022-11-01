@@ -306,8 +306,12 @@ jobs:
       # - restore_cache:
       #     paths: [backend/node_modules]
       #     key: backend-build
+      - checkout
+      - restore_cache:
+          paths: [backend/node_modules]
+          key: backend-build
       - attach_workspace:
-          at: project/
+          at: project/.circleci/ansible/inventory.txt
       - add_ssh_keys:
               # You can get this ID in the section where you registered the SSH Key
           fingerprints: ["d4:83:ea:cd:a5:6e:29:f9:d2:57:45:87:87:76:4b:f0"]
@@ -335,11 +339,6 @@ jobs:
           name: Run Playbook and Configure server
           command: |
             # Your command
-            ls
-            pwd
-            cd project
-            echo "inside project"
-            ls
             cd backend
             npm i
             npm run build
