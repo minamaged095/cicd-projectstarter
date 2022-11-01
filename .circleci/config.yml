@@ -310,7 +310,7 @@ jobs:
           at: project/
       - add_ssh_keys:
               # You can get this ID in the section where you registered the SSH Key
-              fingerprints: ["d4:83:ea:cd:a5:6e:29:f9:d2:57:45:87:87:76:4b:f0"]
+          fingerprints: ["d4:83:ea:cd:a5:6e:29:f9:d2:57:45:87:87:76:4b:f0"]
       - run:
           name: Install Ansible
           command: |
@@ -335,6 +335,8 @@ jobs:
           name: Run Playbook and Configure server
           command: |
             # Your command
+            ls
+            pwd
             cd backend
             npm i
             npm run build
