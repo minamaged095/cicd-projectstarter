@@ -32,7 +32,7 @@
 
 - name: copy artifact
   copy:
-    src: artifact.tar.gz
+    src: ../files/artifact.tar.gz
     dest: ~/web/
 
 - unarchive:
