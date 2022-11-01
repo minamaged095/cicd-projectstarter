@@ -195,7 +195,7 @@ jobs:
             echo "54.185.238.15" >> .circleci/ansible/inventory.txt
       - add_ssh_keys:
               # You can get this ID in the section where you registered the SSH Key
-          fingerprints: ["d4:83:ea:cd:a5:6e:29:f9:d2:57:45:87:87:76:4b:f0"]
+          fingerprints: ["9f:31:95:1b:c8:bb:fe:df:bf:d6:76:01:07:fb:ef:f1"]
       - run:
           name: Install Ansible
           command: |
