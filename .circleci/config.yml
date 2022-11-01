@@ -165,6 +165,10 @@ jobs:
             --query 'Reservations[*].Instances[*].PublicIpAddress' \
             --filters "Name=tag:project,Values=cicdProject" \
             --output text | tee -a .circleci/ansible/inventory.txt
+      - run:
+          name: Install tar utility
+          command: |
+            yum install -y tar gzip
       - persist_to_workspace:
           root: ~/
           paths:
@@ -187,6 +191,10 @@ jobs:
           name: cat inventory file
           command: |
             cat .circleci/ansible/inventory.txt
+      - run:
+          name: Install tar utility
+          command: |
+            yum install -y tar gzip
       - persist_to_workspace:
           root: ~/
           paths:
