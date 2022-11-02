@@ -4,6 +4,44 @@ version: 2.1
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      workflow_id:
+          type: string     
+    steps:
+      - run:
+          name: Destroy environments
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
+            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
+  
+            #exit 1
+ 
+  revert-migrations:
+    description: Revert the last migration if successfully run in the current workflow.
+    # parameters:
+    #   workflow_id:
+    #       type: string      
+    steps:
+      - run:
+          name: Revert migrations
+          when: on_fail
+          command: |
+            # Your Memstash or kvdb.io GET URL code goes here
+            # Example: Memstash.io
+            # SUCCESS=$(curl -H "token: e52b52de-ee26-41a5-86e8-e8dcc3d995a5" --request GET https://api.memstash.io/values/migration_<< parameters.workflow_id >>)
+            # Example: kvdb.io
+            SUCCESS=$(curl --insecure  https://kvdb.io/BaBUKPcutaG5oSneVWB6z1/migration_${CIRCLE_WORKFLOW_ID:0:7})
+            # Logic for reverting the database state
+            if (( $SUCCESS == 1 ));
+            then
+                cd ~/project/backend
+                npm install
+                npm run migration:revert
+            fi  
+            
+  destroy-environment:
+    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     # parameters:
     #   - environment:
     #       default: "world"
@@ -13,19 +51,11 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            aws cloudformation delete-stack --stack-name udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}
-            aws cloudformation delete-stack --stack-name udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}
-       #     exit 1
+     #     exit 1
 
 jobs:
-  # build:
-  #   machine: true
-  #   steps:
-  #     - run: some build command
-  #     - slack/notify:
-  #         branch_pattern: main
-  #         event: fail
-  #         template: basic_fail_1
+
+
   build-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -178,7 +208,8 @@ jobs:
           root: /tmp
           paths:
             - inventory.txt
-    #  - destroy-environment
+      - destroy-environment
+
   configure-infrastructure:
     docker:
       - image: python:3.7-alpine3.11
@@ -219,7 +250,7 @@ jobs:
             # Your command
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml
-      # Here's where you will add some code to rollback on failure                
+      - destroy-environment
 
   run-migrations:
     docker:
@@ -251,7 +282,7 @@ jobs:
                 # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
                 curl https://kvdb.io/BaBUKPcutaG5oSneVWB6z1/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
-     # Here's where you will add some code to rollback on failure    
+      - destroy-environment
 
   deploy-frontend:
     docker:
@@ -293,8 +324,9 @@ jobs:
             npm run build
             tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-      # Here's where you will add some code to rollback on failure  
-                 
+      - destroy-environment
+      - revert-migrations
+
   deploy-backend:
     docker:
       - image: python:3.7-alpine3.11
@@ -359,67 +391,67 @@ jobs:
           command: |
             cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
-      # Here's where you will add some code to rollback on failure    
-
+      - destroy-environment
+      - revert-migrations
   
-  fix-deploy-backend:
-    docker:
-      - image: python:3.7-alpine3.11
-    steps:
-      - checkout
-      - run:
-          name: copy inventory
-          command: |
-            # cp /tmp/inventory.txt .circleci/ansible/
-            # cp /tmp/inventory.txt .circleci/ansible/
-            echo "[web]" > .circleci/ansible/inventory.txt
-            echo "35.89.180.109" >> .circleci/ansible/inventory.txt
-      - add_ssh_keys:
-              # You can get this ID in the section where you registered the SSH Key
-          fingerprints: ["9f:31:95:1b:c8:bb:fe:df:bf:d6:76:01:07:fb:ef:f1"]
-      - run:
-          name: Install Ansible
-          command: |
-            # Install Ansible
-            apk add --update ansible
-      - run:
-          name: Install node and npm
-          command: |
-            apk add --update nodejs npm
-      - run:
-          name: install tar
-          command: |
-            apk add --no-cache tar \
-            gzip
-      - run:
-          name: fix ssh issue
-          command: |
-            apk add --no-cache openssh-client
-      - run:
-          name: fix ssh issue 2
-          command: |
-            echo "Host *" >> /etc/ssh/ssh_config &&\
-            echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
-            #ssh -o StrictHostKeyChecking=no
-      - run:
-          name: prep tar file
-          command: |
-            # Your command
-            cd backend
-            npm i
-            npm run build
-            cd ..
-            # Zip the directory
-            tar -C backend -czvf artifact.tar.gz .
-            ls
-            mkdir .circleci/ansible/roles/deploy/files
-            cp artifact.tar.gz .circleci/ansible/roles/deploy/files
-      - run:
-          name: run playbook
-          command: |
-            cd .circleci/ansible
-            ansible-playbook -i inventory.txt deploy-backend.yml
-      # Here's where you will add some code to rollback on failure  
+  # fix-deploy-backend:
+  #   docker:
+  #     - image: python:3.7-alpine3.11
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: copy inventory
+  #         command: |
+  #           # cp /tmp/inventory.txt .circleci/ansible/
+  #           # cp /tmp/inventory.txt .circleci/ansible/
+  #           echo "[web]" > .circleci/ansible/inventory.txt
+  #           echo "35.89.180.109" >> .circleci/ansible/inventory.txt
+  #     - add_ssh_keys:
+  #             # You can get this ID in the section where you registered the SSH Key
+  #         fingerprints: ["9f:31:95:1b:c8:bb:fe:df:bf:d6:76:01:07:fb:ef:f1"]
+  #     - run:
+  #         name: Install Ansible
+  #         command: |
+  #           # Install Ansible
+  #           apk add --update ansible
+  #     - run:
+  #         name: Install node and npm
+  #         command: |
+  #           apk add --update nodejs npm
+  #     - run:
+  #         name: install tar
+  #         command: |
+  #           apk add --no-cache tar \
+  #           gzip
+  #     - run:
+  #         name: fix ssh issue
+  #         command: |
+  #           apk add --no-cache openssh-client
+  #     - run:
+  #         name: fix ssh issue 2
+  #         command: |
+  #           echo "Host *" >> /etc/ssh/ssh_config &&\
+  #           echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
+  #           #ssh -o StrictHostKeyChecking=no
+  #     - run:
+  #         name: prep tar file
+  #         command: |
+  #           # Your command
+  #           cd backend
+  #           npm i
+  #           npm run build
+  #           cd ..
+  #           # Zip the directory
+  #           tar -C backend -czvf artifact.tar.gz .
+  #           ls
+  #           mkdir .circleci/ansible/roles/deploy/files
+  #           cp artifact.tar.gz .circleci/ansible/roles/deploy/files
+  #     - run:
+  #         name: run playbook
+  #         command: |
+  #           cd .circleci/ansible
+  #           ansible-playbook -i inventory.txt deploy-backend.yml
+  #     # Here's where you will add some code to rollback on failure  
 
   smoke-test:
     docker:
@@ -467,8 +499,9 @@ jobs:
               else
                 return 1
               fi
-      # Here's where you will add some code to rollback on failure  
-
+      - destroy-environment
+      - revert-migrations
+      
 workflows:
   default:
     jobs:
