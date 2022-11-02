@@ -460,10 +460,10 @@ jobs:
       - checkout
       - attach_workspace:
           at: /tmp
-      - run:
-          name: copy inventory
-          command: |
-            cp /tmp/inventory.txt .circleci/ansible/
+      # - run:
+      #     name: copy inventory
+      #     command: |
+      #       cp /tmp/inventory.txt .circleci/ansible/
       - run:
           name: Install dependencies
           command: |
