@@ -4,9 +4,9 @@ version: 2.1
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    parameters:
-      workflow_id:
-          type: string     
+    # parameters:
+    #   workflow_id:
+    #       type: string     
     steps:
       - run:
           name: Destroy environments
@@ -40,18 +40,18 @@ commands:
                 npm run migration:revert
             fi  
             
-  destroy-environment:
-    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    # parameters:
-    #   - environment:
-    #       default: "world"
-    #       type: string 
-    steps:
-      - run:
-          name: Destroy environments
-          when: on_fail
-          command: |
-     #     exit 1
+  # destroy-environment:
+  #   description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+  #   # parameters:
+  #   #   - environment:
+  #   #       default: "world"
+  #   #       type: string 
+  #   steps:
+  #     - run:
+  #         name: Destroy environments
+  #         when: on_fail
+  #         command: |
+  #    #     exit 1
 
 jobs:
 
@@ -501,7 +501,7 @@ jobs:
               fi
       - destroy-environment
       - revert-migrations
-      
+
 workflows:
   default:
     jobs:
