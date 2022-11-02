@@ -56,7 +56,7 @@
 
 - name: unarchive
   #  become: yes
-  command: tar -xf /etc/web/artifact.tar.gz
+  command: tar -xf /etc/web/artifact.tar.gz -C /etc/web/artifact
     # src:  /etc/web/artifact.tar.gz
     # dest: /etc/web
 
