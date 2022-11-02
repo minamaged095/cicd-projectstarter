@@ -57,8 +57,6 @@
 - name: unarchive
   become: yes
   command: tar -xf /etc/web/artifact.tar.gz -C /etc/web/artifact
-    # src:  /etc/web/artifact.tar.gz
-    # dest: /etc/web
 
 # - name: "stop web server"
 #   become: yes
@@ -66,4 +64,4 @@
 
 - name: "start web server"
   become: yes
-  command: cd /etc/web/artifact ; pm2 start npm -- start # pm2 start ~/web/index.js -f
+  command: pm2 start npm -- start # pm2 start ~/web/index.js -f
