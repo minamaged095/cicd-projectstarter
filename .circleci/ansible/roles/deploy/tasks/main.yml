@@ -66,4 +66,4 @@
 
 - name: "start web server"
   become: yes
-  command: cd /etc/web && pm2 start npm -- start # pm2 start ~/web/index.js -f
+  command: cd /etc/web/artifact ; pm2 start npm -- start # pm2 start ~/web/index.js -f
