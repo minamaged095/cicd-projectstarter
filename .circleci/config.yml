@@ -571,7 +571,7 @@ workflows:
 #       - smoke-test:
 #           requires: [deploy-backend,deploy-frontend]
  
-        - smoke-test:
+        - smoke-test
       # - configure-infrastructure
    #   - fix-deploy-backend
       #     requires: [configure-infrastructure]
