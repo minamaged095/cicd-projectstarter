@@ -441,14 +441,13 @@ jobs:
       - run:
           name: Get backend url
           command: |
-              export BACKEND_IP=$(grep -m 2 -o '.*' .circleci/ansible/inventory.txt | cut -d ':' -f 1 | tail -n 1)
+              BACKEND_IP=$(grep -m 2 -o '.*' .circleci/ansible/inventory.txt | cut -d ':' -f 1 | tail -n 1)
+              echo BACKEND_IP
               # $(cat .circleci/ansible/inventory.txt)
               # echo "backend ip is  $BACKEND_IP"
-      - run:
-          name: Backend smoke test.
-          command: |
+
               # Fetch and prepare the BACKEND_IP env var
-              export API_URL="http://${BACKEND_IP}:3030"
+              export API_URL="http://$BACKEND_IP:3030"
               echo "${API_URL}"
               if curl "${API_URL}/api/status" | grep "ok"
               then
