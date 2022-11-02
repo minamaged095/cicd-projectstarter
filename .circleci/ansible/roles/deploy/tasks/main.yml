@@ -50,9 +50,9 @@
     mode: u=rwX,g=rX,o=rX
     recurse: yes
 
-# - name: ls comm
-#   become: yes
-#   command: cd /tmp/web && ls
+- name: chmod
+  become: yes
+  command: chmod 777 /etc/web/artifact.tar.gz
 
 - unarchive:
   #  become: yes
