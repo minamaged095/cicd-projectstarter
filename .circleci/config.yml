@@ -441,9 +441,9 @@ jobs:
       - run:
           name: Get backend url
           command: |
-              BACKEND_IP= $(grep -m 2 -o '.*' .circleci/ansible/inventory.txt | cut -d ':' -f 1 | tail -n 1)
+              export BACKEND_IP= $(grep -m 2 -o '.*' .circleci/ansible/inventory.txt | cut -d ':' -f 1 | tail -n 1)
               # $(cat .circleci/ansible/inventory.txt)
-              echo "backend ip is  $BACKEND_IP"
+              # echo "backend ip is  $BACKEND_IP"
       - run:
           name: Backend smoke test.
           command: |
