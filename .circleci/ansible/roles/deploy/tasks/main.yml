@@ -60,9 +60,9 @@
     # src:  /etc/web/artifact.tar.gz
     # dest: /etc/web
 
-- name: "stop web server"
-  become: yes
-  command: pm2 stop default
+# - name: "stop web server"
+#   become: yes
+#   command: pm2 stop default
 
 - name: "start web server"
   become: yes
