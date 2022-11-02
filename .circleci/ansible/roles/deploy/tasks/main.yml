@@ -54,7 +54,7 @@
   become: yes
   command: chmod 777 /etc/web/artifact.tar.gz
 
-- unarchive:
+- name: unarchive
   #  become: yes
   command: tar -xf /etc/web/artifact.tar.gz
     # src:  /etc/web/artifact.tar.gz
