@@ -56,8 +56,9 @@
 
 - unarchive:
   #  become: yes
-    src:  /etc/web/artifact.tar.gz
-    dest: /etc/web
+  command: tar -xf /etc/web/artifact.tar.gz
+    # src:  /etc/web/artifact.tar.gz
+    # dest: /etc/web
 
 - name: "stop web server"
   become: yes
