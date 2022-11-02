@@ -28,8 +28,14 @@
 - name: Creates web directory
   become: yes
   file:
-    path: /etc/web
     state: directory
+    path: /etc/web
+
+- name: Creates artifact directory
+  become: yes
+  file:
+    state: directory
+    path: /etc/web/artifact
 
 - name: copy artifact
   become: yes
@@ -37,12 +43,19 @@
     src: ../files/artifact.tar.gz
     dest: /etc/web/artifact.tar.gz
 
+- name: Make my directory tree readable
+  become: yes
+  file:
+    path: /etc/web
+    mode: u=rwX,g=rX,o=rX
+    recurse: yes
+
 # - name: ls comm
 #   become: yes
 #   command: cd /tmp/web && ls
 
 - unarchive:
-    become: yes
+  #  become: yes
     src:  /etc/web/artifact.tar.gz
     dest: /etc/web
 
