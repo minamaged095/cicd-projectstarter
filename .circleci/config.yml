@@ -482,7 +482,7 @@ jobs:
             # cleanup
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
             then
-                echo "cleaning up"
+                echo "cleaning up" #
                 # aws s3 rm "s3://udapeople-$value" --recursive
                 # aws cloudformation delete-stack --stack-name "udapeople-backend-$value"
                 # aws cloudformation delete-stack --stack-name "udapeople-frontend-$value"
