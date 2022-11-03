@@ -1,12 +1,8 @@
 version: 2.1
-# orbs:
-#   slack: circleci/slack@4.10.1
+
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-    # parameters:
-    #   workflow_id:
-    #       type: string     
     steps:
       - run:
           name: Destroy environments
@@ -19,9 +15,6 @@ commands:
  
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
-    # parameters:
-    #   workflow_id:
-    #       type: string      
     steps:
       - run:
           name: Revert migrations
@@ -38,19 +31,6 @@ commands:
                 npm install
                 npm run migration:revert
             fi  
-            
-  # destroy-environment:
-  #   description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-  #   # parameters:
-  #   #   - environment:
-  #   #       default: "world"
-  #   #       type: string 
-  #   steps:
-  #     - run:
-  #         name: Destroy environments
-  #         when: on_fail
-  #         command: |
-  #    #     exit 1
 
 jobs:
 
@@ -234,7 +214,6 @@ jobs:
             # echo "54.187.195.121" >> .circleci/ansible/inventory.txt
             # echo "54.185.238.15" >> .circleci/ansible/inventory.txt
       - add_ssh_keys:
-              # You can get this ID in the section where you registered the SSH Key
           fingerprints: ["9f:31:95:1b:c8:bb:fe:df:bf:d6:76:01:07:fb:ef:f1"]
       - run:
           name: Install Ansible
@@ -299,12 +278,6 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      # - run:
-      #     name: Install ansible
-      #     command: |
-      #       sudo yum -y update
-      #       sudo yum install -y epel-release
-      #       yum install -y ansible
       - run:
           name: Install tar utility
           command: |
@@ -314,7 +287,6 @@ jobs:
           command: |
             curl -sL https://rpm.nodesource.com/setup_8.x | bash -
             yum install -y nodejs
-          #  apk add --update npm
       - run:
           name: Get backend url
           command: |
@@ -341,11 +313,6 @@ jobs:
     docker:
       - image: python:3.7-alpine3.11
     steps:
-      # - restore_cache:
-      #     keys: [backend-build]
-      # - restore_cache:
-      #     paths: [backend/node_modules]
-      #     key: backend-build
       - checkout
       - restore_cache:
           paths: [backend/node_modules]
@@ -357,7 +324,6 @@ jobs:
           command: |
             cp /tmp/inventory.txt .circleci/ansible/
       - add_ssh_keys:
-              # You can get this ID in the section where you registered the SSH Key
           fingerprints: ["9f:31:95:1b:c8:bb:fe:df:bf:d6:76:01:07:fb:ef:f1"]
       - run:
           name: Install Ansible
@@ -413,65 +379,6 @@ jobs:
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-environment
       - revert-migrations
-  
-  # fix-deploy-backend:
-  #   docker:
-  #     - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout
-  #     - run:
-  #         name: copy inventory
-  #         command: |
-  #           # cp /tmp/inventory.txt .circleci/ansible/
-  #           # cp /tmp/inventory.txt .circleci/ansible/
-  #           echo "[web]" > .circleci/ansible/inventory.txt
-  #           echo "35.89.180.109" >> .circleci/ansible/inventory.txt
-  #     - add_ssh_keys:
-  #             # You can get this ID in the section where you registered the SSH Key
-  #         fingerprints: ["9f:31:95:1b:c8:bb:fe:df:bf:d6:76:01:07:fb:ef:f1"]
-  #     - run:
-  #         name: Install Ansible
-  #         command: |
-  #           # Install Ansible
-  #           apk add --update ansible
-  #     - run:
-  #         name: Install node and npm
-  #         command: |
-  #           apk add --update nodejs npm
-  #     - run:
-  #         name: install tar
-  #         command: |
-  #           apk add --no-cache tar \
-  #           gzip
-  #     - run:
-  #         name: fix ssh issue
-  #         command: |
-  #           apk add --no-cache openssh-client
-  #     - run:
-  #         name: fix ssh issue 2
-  #         command: |
-  #           echo "Host *" >> /etc/ssh/ssh_config &&\
-  #           echo "StrictHostKeyChecking no" >> /etc/ssh/ssh_config
-  #           #ssh -o StrictHostKeyChecking=no
-  #     - run:
-  #         name: prep tar file
-  #         command: |
-  #           # Your command
-  #           cd backend
-  #           npm i
-  #           npm run build
-  #           cd ..
-  #           # Zip the directory
-  #           tar -C backend -czvf artifact.tar.gz .
-  #           ls
-  #           mkdir .circleci/ansible/roles/deploy/files
-  #           cp artifact.tar.gz .circleci/ansible/roles/deploy/files
-  #     - run:
-  #         name: run playbook
-  #         command: |
-  #           cd .circleci/ansible
-  #           ansible-playbook -i inventory.txt deploy-backend.yml
-  #     # Here's where you will add some code to rollback on failure  
 
   smoke-test:
     docker:
@@ -575,9 +482,10 @@ jobs:
             # cleanup
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
             then
-                aws s3 rm "s3://udapeople-$value" --recursive
-                aws cloudformation delete-stack --stack-name "udapeople-backend-$value"
-                aws cloudformation delete-stack --stack-name "udapeople-frontend-$value"
+                echo "cleaning up"
+                # aws s3 rm "s3://udapeople-$value" --recursive
+                # aws cloudformation delete-stack --stack-name "udapeople-backend-$value"
+                # aws cloudformation delete-stack --stack-name "udapeople-frontend-$value"
             else
                 echo "can not cleanup"
             fi
@@ -587,8 +495,7 @@ jobs:
 workflows:
   default:
     jobs:
-     ## - build:
-     ##    context: slack-secrets
+
       - build-frontend
       - build-backend
       # - test-frontend:
@@ -599,36 +506,7 @@ workflows:
       #     requires: [build-frontend]
       # - scan-backend:
       #     requires: [build-backend]
-#       - deploy-infrastructure:
-#           requires: [scan-frontend]
-#  ##     - configure-infrastructure
-#       - configure-infrastructure:
-#           requires: [deploy-infrastructure]
-#       - run-migrations:
-#           requires: [configure-infrastructure]
-#  ##     - deploy-frontend
-#       - deploy-frontend:
-#           requires: [run-migrations]
 
-  #     - deploy-infrastructure:
-  #         requires: [build-frontend,build-backend]
-  #     - configure-infrastructure:
-  #         requires: [deploy-infrastructure]
-  #   #  - run-migrations:
-  #  #       requires: [configure-infrastructure]
-  # #    - deploy-frontend:
-  #  #       requires: [configure-infrastructure]
-  #     - deploy-backend:
-  #         requires: [configure-infrastructure]
-  #   #  - run-migrations
-
-
-   #   - deploy-backend:
-   #       requires: [build-backend]
-
-      # - fix-deploy-infrastructure
-      # - test-deploy-infrastructure:
-      #      requires: [fix-deploy-infrastructure]
       - deploy-infrastructure:
           requires: [build-frontend,build-backend]
       - configure-infrastructure:
@@ -645,8 +523,3 @@ workflows:
           requires: [smoke-test]
       - cleanup:
           requires: [cloudfront-update]
-
-      #  - smoke-test
-      # - configure-infrastructure
-   #   - fix-deploy-backend
-      #     requires: [configure-infrastructure]
