@@ -482,10 +482,10 @@ jobs:
             # cleanup
             if [[ "${CIRCLE_WORKFLOW_ID:0:7}" != "${OldWorkflowID}" ]]
             then
-                echo "cleaning up" #
-                # aws s3 rm "s3://udapeople-$value" --recursive
-                # aws cloudformation delete-stack --stack-name "udapeople-backend-$value"
-                # aws cloudformation delete-stack --stack-name "udapeople-frontend-$value"
+                echo "cleaning up" 
+                aws s3 rm "s3://udapeople-$value" --recursive
+                aws cloudformation delete-stack --stack-name "udapeople-backend-$value"
+                aws cloudformation delete-stack --stack-name "udapeople-frontend-$value"
             else
                 echo "can not cleanup"
             fi
@@ -498,17 +498,17 @@ workflows:
 
       - build-frontend
       - build-backend
-      # - test-frontend:
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     requires: [build-frontend]
-      # - scan-backend:
-      #     requires: [build-backend]
+      - test-frontend:
+          requires: [build-frontend]
+      - test-backend:
+          requires: [build-backend]
+      - scan-frontend:
+          requires: [build-frontend]
+      - scan-backend:
+          requires: [build-backend]
 
       - deploy-infrastructure:
-          requires: [build-frontend,build-backend]
+          requires: [scan-frontend,scan-backend,test-frontend,test-backend]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       - run-migrations:
